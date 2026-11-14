@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f7a5a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="موجودی کارت">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>موجودی کارت‌ها</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--text:#1d1d1b;--mute:#77756e;--acc:#1f7a5a;--red:#c0392b;--line:#e4e2db;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#201f1d;--text:#f2f0ea;--mute:#9a978e;--acc:#4cc79a;--red:#ef7a6c;--line:#33312e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141413;--card:#201f1d;--text:#f2f0ea;--mute:#9a978e;--acc:#4cc79a;--red:#ef7a6c;--line:#33312e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,"Segoe UI",system-ui,sans-serif;line-height:1.6}
+.w{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.lbl{color:var(--mute);font-size:14px}
+.bal{font-size:36px;font-weight:700;margin:2px 0 0;color:var(--acc)}
+.bal.neg{color:var(--red)}
+.tot{font-size:22px;font-weight:700}
+.unit{font-size:14px;color:var(--mute);font-weight:400}
+input{width:100%;font:inherit;font-size:18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin-top:8px}
+input:focus{outline:2px solid var(--acc);outline-offset:1px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px}
+.main{width:100%;margin-top:10px;background:var(--acc);color:#fff;font-size:17px;font-weight:700}
+.ghost{background:none;color:var(--mute);padding:6px 8px;font-size:14px}
+.ghost.warn{color:var(--red)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.amt{color:var(--red);font-weight:700;white-space:nowrap}
+.sub{font-size:12px;color:var(--mute)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.empty{color:var(--mute);text-align:center;padding:10px 0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:2px}
+.chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:8px 16px;font-size:15px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.chip.add{color:var(--acc);border-style:dashed}
+.cname{font-size:18px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="box" id="totBox"><div class="lbl">مجموع همه کارت‌ها</div><div class="tot" id="tot"></div></div>
+  <div class="chips" id="chips"></div>
+
+  <div class="box" id="addBox">
+    <div class="lbl">کارت جدید</div>
+    <input id="nameIn" placeholder="اسم کارت (مثلاً ملی، ملت)">
+    <input id="initIn" inputmode="numeric" placeholder="موجودی فعلی کارت">
+    <button class="main" id="addBtn">افزودن کارت</button>
+    <button class="ghost" id="cancelAdd" style="width:100%;margin-top:6px">انصراف</button>
+  </div>
+
+  <div id="cardArea">
+    <div class="box">
+      <div class="top"><span class="cname" id="cn"></span>
+        <span><button class="ghost" id="edit">تغییر موجودی</button><button class="ghost warn" id="del">حذف کارت</button></span></div>
+      <div class="lbl" style="margin-top:6px">موجودی</div>
+      <div class="bal" id="bal"></div>
+      <div id="editBox" style="display:none">
+        <input id="editIn" inputmode="numeric" placeholder="موجودی جدید">
+        <button class="main" id="editBtn">ثبت موجودی</button>
+      </div>
+    </div>
+    <div class="box">
+      <div class="lbl">خرج جدید</div>
+      <input id="amtIn" inputmode="numeric" placeholder="مبلغ خرج">
+      <input id="noteIn" placeholder="برای چی؟ (اختیاری)">
+      <button class="main" id="spendBtn">خرج کردم</button>
+    </div>
+    <div class="box">
+      <div class="top"><span class="lbl">خرج‌های این کارت</span><button class="ghost" id="clear">پاک کردن لیست</button></div>
+      <div id="list"></div>
+    </div>
+  </div>
+</div>
+<script>
+var KEY="card-balance-v2",OLD="card-balance-v1",S={cards:[],cur:null},adding=false,editing=false;
+try{var r=localStorage.getItem(KEY);
+  if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.cards))S=p;}
+  else{var o=localStorage.getItem(OLD);
+    if(o){var q=JSON.parse(o);
+      if(q&&q.balance!==null&&q.balance!==undefined){var id=Date.now();S={cards:[{id:id,name:"کارت ۱",balance:q.balance,items:q.items||[]}],cur:id};}}}
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function parse(v){
+  v=String(v).replace(/[۰-۹]/g,function(d){return d.charCodeAt(0)-1776})
+             .replace(/[٠-٩]/g,function(d){return d.charCodeAt(0)-1632})
+             .replace(/[,،٬\s]/g,"");
+  var n=Number(v);return isFinite(n)&&v!==""?n:NaN;
+}
+function fmt(n){return Number(n).toLocaleString("fa-IR")}
+var $=function(i){return document.getElementById(i)};
+function cur(){for(var i=0;i<S.cards.length;i++)if(S.cards[i].id===S.cur)return S.cards[i];return null;}
+function armed(btn,label,fn){
+  if(btn.dataset.a){clearTimeout(+btn.dataset.a);btn.dataset.a="";btn.textContent=btn.dataset.l;fn();return;}
+  btn.dataset.l=btn.textContent;btn.textContent=label;
+  btn.dataset.a=setTimeout(function(){btn.dataset.a="";btn.textContent=btn.dataset.l;},3000);
+}
+function render(){
+  var c=cur();
+  if(!c&&S.cards.length){S.cur=S.cards[0].id;c=S.cards[0];}
+  var showAdd=adding||!S.cards.length;
+  var sum=0;S.cards.forEach(function(k){sum+=k.balance});
+  $("totBox").style.display=S.cards.length>1?"block":"none";
+  $("tot").innerHTML=fmt(sum)+' <span class="unit">تومان</span>';
+  var ch=$("chips");ch.innerHTML="";
+  S.cards.forEach(function(k){
+    var b=document.createElement("button");b.className="chip"+(k.id===S.cur&&!showAdd?" on":"");
+    b.textContent=k.name;b.onclick=function(){S.cur=k.id;adding=false;editing=false;save();render();};
+    ch.appendChild(b);
+  });
+  var a=document.createElement("button");a.className="chip add";a.textContent="+ کارت جدید";
+  a.onclick=function(){adding=true;render();$("nameIn").focus();};
+  if(S.cards.length)ch.appendChild(a);
+  ch.style.display=S.cards.length?"flex":"none";
+  $("addBox").style.display=showAdd?"block":"none";
+  $("cancelAdd").style.display=S.cards.length?"block":"none";
+  $("cardArea").style.display=(!showAdd&&c)?"block":"none";
+  if(!c||showAdd)return;
+  $("cn").textContent=c.name;
+  $("bal").className="bal"+(c.balance<0?" neg":"");
+  $("bal").innerHTML=fmt(c.balance)+' <span class="unit">تومان</span>';
+  $("editBox").style.display=editing?"block":"none";
+  var l=$("list");l.innerHTML="";
+  if(!c.items.length){l.innerHTML='<div class="empty">هنوز خرجی ثبت نشده.</div>';return;}
+  c.items.forEach(function(it){
+    var d=document.createElement("div");d.className="row";
+    var x1=document.createElement("div");
+    var t=document.createElement("div");t.textContent=it.note||"خرج";
+    var s=document.createElement("div");s.className="sub";
+    s.textContent=new Date(it.t).toLocaleString("fa-IR",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+    x1.appendChild(t);x1.appendChild(s);
+    var m=document.createElement("div");m.className="amt";m.textContent="−"+fmt(it.amt);
+    var x=document.createElement("button");x.className="ghost";x.textContent="لغو";
+    x.onclick=function(){c.balance+=it.amt;c.items=c.items.filter(function(q){return q.id!==it.id});save();render();};
+    var rr=document.createElement("div");rr.style.cssText="display:flex;align-items:center;gap:4px";
+    rr.appendChild(m);rr.appendChild(x);
+    d.appendChild(x1);d.appendChild(rr);l.appendChild(d);
+  });
+}
+$("addBtn").onclick=function(){
+  var n=parse($("initIn").value);if(isNaN(n))return;
+  var id=Date.now(),name=$("nameIn").value.trim()||("کارت "+fmt(S.cards.length+1));
+  S.cards.push({id:id,name:name,balance:n,items:[]});S.cur=id;adding=false;
+  $("nameIn").value="";$("initIn").value="";save();render();
+};
+$("cancelAdd").onclick=function(){adding=false;render();};
+$("edit").onclick=function(){editing=!editing;render();if(editing){var c=cur();$("editIn").value="";$("editIn").focus();}};
+$("editBtn").onclick=function(){var n=parse($("editIn").value);if(isNaN(n))return;cur().balance=n;editing=false;save();render();};
+$("del").onclick=function(){var b=this;armed(b,"مطمئنی؟ دوباره بزن",function(){
+  S.cards=S.cards.filter(function(k){return k.id!==S.cur});S.cur=S.cards.length?S.cards[0].id:null;editing=false;save();render();});};
+function spend(){
+  var c=cur(),n=parse($("amtIn").value);if(!c||isNaN(n)||n<=0)return;
+  c.balance-=n;c.items.unshift({id:Date.now(),amt:n,note:$("noteIn").value.trim(),t:Date.now()});
+  $("amtIn").value="";$("noteIn").value="";save();render();$("amtIn").focus();
+}
+$("spendBtn").onclick=spend;
+$("amtIn").addEventListener("keydown",function(e){if(e.key==="Enter")spend()});
+$("clear").onclick=function(){var b=this,c=cur();if(!c||!c.items.length)return;
+  armed(b,"مطمئنی؟ دوباره بزن",function(){c.items=[];save();render();});};
+render();
+try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}
+</script>
+</body>
+</html>
