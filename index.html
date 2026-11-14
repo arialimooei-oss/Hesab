@@ -33,6 +33,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
 .row:first-child{border-top:0}
 .amt{color:var(--red);font-weight:700;white-space:nowrap}
+.amt.in{color:var(--acc)}
 .sub{font-size:12px;color:var(--mute)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
 .empty{color:var(--mute);text-align:center;padding:10px 0}
@@ -74,7 +75,13 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px
       <button class="main" id="spendBtn">خرج کردم</button>
     </div>
     <div class="box">
-      <div class="top"><span class="lbl">خرج‌های این کارت</span><button class="ghost" id="clear">پاک کردن لیست</button></div>
+      <div class="lbl">افزایش موجودی</div>
+      <input id="depIn" inputmode="numeric" placeholder="مبلغ واریزی">
+      <input id="depNote" placeholder="از کجا؟ (اختیاری)">
+      <button class="main" id="depBtn">واریز شد</button>
+    </div>
+    <div class="box">
+      <div class="top"><span class="lbl">تراکنش‌های این کارت</span><button class="ghost" id="clear">پاک کردن لیست</button></div>
       <div id="list"></div>
     </div>
   </div>
@@ -128,17 +135,17 @@ function render(){
   $("bal").innerHTML=fmt(c.balance)+' <span class="unit">تومان</span>';
   $("editBox").style.display=editing?"block":"none";
   var l=$("list");l.innerHTML="";
-  if(!c.items.length){l.innerHTML='<div class="empty">هنوز خرجی ثبت نشده.</div>';return;}
+  if(!c.items.length){l.innerHTML='<div class="empty">هنوز تراکنشی ثبت نشده.</div>';return;}
   c.items.forEach(function(it){
     var d=document.createElement("div");d.className="row";
     var x1=document.createElement("div");
-    var t=document.createElement("div");t.textContent=it.note||"خرج";
+    var t=document.createElement("div");t.textContent=it.note||(it.kind==="in"?"واریز":"خرج");
     var s=document.createElement("div");s.className="sub";
     s.textContent=new Date(it.t).toLocaleString("fa-IR",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
     x1.appendChild(t);x1.appendChild(s);
-    var m=document.createElement("div");m.className="amt";m.textContent="−"+fmt(it.amt);
+    var m=document.createElement("div");m.className="amt"+(it.kind==="in"?" in":"");m.textContent=(it.kind==="in"?"+":"−")+fmt(it.amt);
     var x=document.createElement("button");x.className="ghost";x.textContent="لغو";
-    x.onclick=function(){c.balance+=it.amt;c.items=c.items.filter(function(q){return q.id!==it.id});save();render();};
+    x.onclick=function(){c.balance+=(it.kind==="in"?-it.amt:it.amt);c.items=c.items.filter(function(q){return q.id!==it.id});save();render();};
     var rr=document.createElement("div");rr.style.cssText="display:flex;align-items:center;gap:4px";
     rr.appendChild(m);rr.appendChild(x);
     d.appendChild(x1);d.appendChild(rr);l.appendChild(d);
@@ -164,6 +171,13 @@ $("spendBtn").onclick=spend;
 $("amtIn").addEventListener("keydown",function(e){if(e.key==="Enter")spend()});
 $("clear").onclick=function(){var b=this,c=cur();if(!c||!c.items.length)return;
   armed(b,"مطمئنی؟ دوباره بزن",function(){c.items=[];save();render();});};
+function deposit(){
+  var c=cur(),n=parse($("depIn").value);if(!c||isNaN(n)||n<=0)return;
+  c.balance+=n;c.items.unshift({id:Date.now(),amt:n,kind:"in",note:$("depNote").value.trim(),t:Date.now()});
+  $("depIn").value="";$("depNote").value="";save();render();
+}
+$("depBtn").onclick=deposit;
+$("depIn").addEventListener("keydown",function(e){if(e.key==="Enter")deposit()});
 render();
 try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}
 </script>
