@@ -3,49 +3,93 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f7a5a">
+<meta name="theme-color" content="#0b3d6b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="موجودی کارت">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>موجودی کارت‌ها</title>
 <style>
-:root{--bg:#f6f5f1;--card:#fff;--text:#1d1d1b;--mute:#77756e;--acc:#1f7a5a;--red:#c0392b;--line:#e4e2db;
+:root{--paper:#f4e4bb;--paper2:#ead2a0;--ink:#3b2410;--mute:#7b5a3a;--line:#8a5a2b;--acc:#1e7a46;--red:#c4281b;--gold:#ffd45e;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#201f1d;--text:#f2f0ea;--mute:#9a978e;--acc:#4cc79a;--red:#ef7a6c;--line:#33312e;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#141413;--card:#201f1d;--text:#f2f0ea;--mute:#9a978e;--acc:#4cc79a;--red:#ef7a6c;--line:#33312e;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:#0b3d6b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,"Segoe UI",system-ui,sans-serif;line-height:1.6}
-.w{max-width:480px;margin:0 auto;padding:20px 16px 40px}
-.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
-.lbl{color:var(--mute);font-size:14px}
-.bal{font-size:36px;font-weight:700;margin:2px 0 0;color:var(--acc)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:Tahoma,"Segoe UI",system-ui,sans-serif;line-height:1.6;
+background:radial-gradient(circle at 80% 6%,#fff2b0 0,#ffc65c 7%,transparent 24%),linear-gradient(180deg,#ff9d5c 0%,#ff7e5f 16%,#2f86bd 42%,#0b3d6b 100%) fixed}
+.sea{position:fixed;left:0;right:0;bottom:0;height:110px;overflow:hidden;z-index:0;pointer-events:none}
+.sea svg{position:absolute;bottom:0;left:0;width:200%;height:100%}
+.sea .a{animation:wave 14s linear infinite}
+.sea .b{animation:wave 9s linear infinite reverse;bottom:-14px}
+@keyframes wave{to{transform:translateX(-50%)}}
+.w{max-width:480px;margin:0 auto;padding:22px 16px 120px;position:relative;z-index:1}
+.hd{display:flex;align-items:center;gap:12px;margin:6px 0 18px}
+.flag{width:62px;height:62px;flex:0 0 auto;transform-origin:8px 60px;animation:sway 3s ease-in-out infinite;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
+@keyframes sway{50%{transform:rotate(-5deg)}}
+.ttl{direction:ltr;font-family:Impact,"Arial Black",Haettenschweiler,sans-serif;font-size:30px;letter-spacing:2px;line-height:1.05;color:var(--gold);text-shadow:2px 2px 0 #7a3410,-1px -1px 0 #7a3410,1px -1px 0 #7a3410,-1px 1px 0 #7a3410,0 5px 10px rgba(0,0,0,.35)}
+.sub2{color:#fff3d6;font-size:13px;margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.box{position:relative;background:linear-gradient(135deg,var(--paper) 0,var(--paper2) 100%);border:3px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:inset 0 0 28px rgba(122,74,30,.35),0 6px 14px rgba(0,0,0,.35)}
+.box::before,.box::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d9a45e,#6b3f14);top:7px}
+.box::before{left:7px}.box::after{right:7px}
+#cardArea .box:first-child .top{margin-top:2px}
+#cardArea .box:first-child{padding-top:30px}
+#cardArea .box:first-child .cname::before{content:"★ WANTED ★";position:absolute;top:6px;left:0;right:0;text-align:center;font-family:Impact,"Arial Black",sans-serif;font-weight:400;letter-spacing:5px;font-size:13px;color:var(--line)}
+.lbl{color:var(--mute);font-size:13px}
+.bal{font-family:Impact,"Arial Black",sans-serif;font-size:40px;font-weight:400;letter-spacing:1px;margin:2px 0 0;color:#1e6a3a;text-shadow:1px 1px 0 rgba(255,255,255,.5)}
 .bal.neg{color:var(--red)}
-.tot{font-size:22px;font-weight:700}
-.unit{font-size:14px;color:var(--mute);font-weight:400}
-input{width:100%;font:inherit;font-size:18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin-top:8px}
-input:focus{outline:2px solid var(--acc);outline-offset:1px}
-button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px}
-.main{width:100%;margin-top:10px;background:var(--acc);color:#fff;font-size:17px;font-weight:700}
+.unit{font-size:14px;color:var(--mute);font-weight:400;font-family:Tahoma,sans-serif;letter-spacing:0;text-shadow:none}
+.tot{font-family:Impact,"Arial Black",sans-serif;font-size:24px;font-weight:400;letter-spacing:1px;color:var(--ink)}
+.statrow{display:flex;align-items:center;gap:10px;margin-top:6px}
+.statrow.fine{color:var(--acc)}
+.statrow.danger{color:var(--red)}
+.stat{display:inline-block;padding:1px 10px;font-family:Impact,"Arial Black",sans-serif;font-size:13px;letter-spacing:2px;border:2px solid currentColor;border-radius:4px;transform:rotate(-2deg)}
+.statrow.danger .stat{animation:shake .5s infinite}
+@keyframes shake{25%{transform:rotate(2deg)}75%{transform:rotate(-4deg)}}
+.ecg{width:120px;height:30px;flex:0 0 auto;overflow:visible}
+.ecg path{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-dasharray:100;animation:ecg 2.8s linear infinite}
+.statrow.danger .ecg path{animation-duration:1s}
+@keyframes ecg{0%{stroke-dashoffset:100}55%{stroke-dashoffset:0}100%{stroke-dashoffset:-100}}
+input{width:100%;font:inherit;font-size:18px;padding:12px 14px;border-radius:8px;border:2px solid var(--line);background:#fff8e4;color:var(--ink);margin-top:8px}
+input::placeholder{color:#a58862}
+input:focus{outline:3px solid #ff9d3c;outline-offset:1px}
+button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:12px 16px}
+.main{position:relative;overflow:hidden;width:100%;margin-top:10px;background:linear-gradient(#f2582f,#b3261a);border:2px solid #6e150e;color:#fff;font-size:17px;font-weight:700;text-shadow:0 1px 0 #6e150e;box-shadow:0 4px 0 #6e150e}
+.main:active{transform:translateY(3px);box-shadow:0 1px 0 #6e150e}
+.main::after{content:"";position:absolute;top:0;bottom:0;width:35%;left:-60%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:sh 3.4s infinite}
+@keyframes sh{to{left:140%}}
 .ghost{background:none;color:var(--mute);padding:6px 8px;font-size:14px}
 .ghost.warn{color:var(--red)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:2px dashed rgba(138,90,43,.45)}
 .row:first-child{border-top:0}
-.amt{color:var(--red);font-weight:700;white-space:nowrap}
+.amt{color:var(--red);font-family:Impact,"Arial Black",sans-serif;letter-spacing:1px;white-space:nowrap}
 .amt.in{color:var(--acc)}
 .sub{font-size:12px;color:var(--mute)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
 .empty{color:var(--mute);text-align:center;padding:10px 0}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:2px}
-.chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:8px 16px;font-size:15px}
-.chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
-.chip.add{color:var(--acc);border-style:dashed}
-.cname{font-size:18px;font-weight:700}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:2px}
+.chip{flex:0 0 auto;background:linear-gradient(#a8703a,#6f4320);border:2px solid #3f230d;color:#fff1d2;border-radius:8px;padding:8px 16px;font-size:15px;box-shadow:0 3px 0 #3f230d}
+.chip.on{background:linear-gradient(#ffe27a,#f0a81c);border-color:#7a4a05;color:#4a2a05;font-weight:700}
+.chip.add{background:rgba(255,255,255,.18);color:#fff;border:2px dashed #fff3d6;box-shadow:none}
+.cname{font-size:19px;font-weight:700}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+.dsum{display:flex;gap:8px;margin:10px 0 8px}
+.dsum>div{flex:1;text-align:center;border:2px solid var(--line);border-radius:8px;padding:6px 4px;background:rgba(255,255,255,.35)}
+.dsum .v{font-family:Impact,"Arial Black",sans-serif;font-size:17px;letter-spacing:.5px}
+.dsum .unit{font-size:11px}
+.dnet.neg{color:var(--red)}
+.two{display:flex;gap:8px}
+.two button{flex:1;padding:11px 8px;font-size:14px}
+.main.alt{background:linear-gradient(#3a96d0,#14507d);border-color:#0b3556;box-shadow:0 4px 0 #0b3556;text-shadow:0 1px 0 #0b3556}
+.main.alt:active{box-shadow:0 1px 0 #0b3556}
+.dh{font-weight:700;margin:16px 0 2px}
 </style>
 </head>
 <body>
+<div class="sea" aria-hidden="true"><svg class="a" viewBox="0 0 2400 120" preserveAspectRatio="none"><path d="M0 60Q150 20 300 60T600 60T900 60T1200 60T1500 60T1800 60T2100 60T2400 60V120H0Z" fill="#0d5a94" opacity=".75"/></svg><svg class="b" viewBox="0 0 2400 120" preserveAspectRatio="none"><path d="M0 70Q150 35 300 70T600 70T900 70T1200 70T1500 70T1800 70T2100 70T2400 70V120H0Z" fill="#082f55"/></svg></div>
 <div class="w">
+  <div class="hd">
+    <svg class="flag" viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="2" width="3" height="60" rx="1.5" fill="#6b3f14"/><path d="M9 6H60V44H9Z" fill="#14100e" stroke="#ffd45e" stroke-width="1.5"/><circle cx="34" cy="21" r="8" fill="#fff"/><rect x="29.5" y="26" width="9" height="6" rx="1.5" fill="#fff"/><circle cx="31" cy="21" r="2.1" fill="#14100e"/><circle cx="37" cy="21" r="2.1" fill="#14100e"/><path d="M33 25h2l-1 2z" fill="#14100e"/><path d="M20 36L48 18M20 18L48 36" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0"/><path d="M19 38L49 30M19 30L49 38" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+    <div><div class="ttl">TREASURE LOG</div><div class="sub2">موجودی کارت‌ها</div></div>
+  </div>
   <div class="box" id="totBox"><div class="lbl">مجموع همه کارت‌ها</div><div class="tot" id="tot"></div></div>
   <div class="chips" id="chips"></div>
 
@@ -63,6 +107,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px
         <span><button class="ghost" id="edit">تغییر موجودی</button><button class="ghost warn" id="del">حذف کارت</button></span></div>
       <div class="lbl" style="margin-top:6px">موجودی</div>
       <div class="bal" id="bal"></div>
+      <div class="statrow fine" id="statrow"><div class="stat" id="stat"></div><svg class="ecg" viewBox="0 0 120 30" aria-hidden="true"><path pathLength="100" d="M0 15Q15 0 30 15T60 15T90 15T120 15"/></svg></div>
       <div id="editBox" style="display:none">
         <input id="editIn" inputmode="numeric" placeholder="موجودی جدید">
         <button class="main" id="editBtn">ثبت موجودی</button>
@@ -85,6 +130,20 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px
       <div id="list"></div>
     </div>
   </div>
+  <div class="box" id="debtBox">
+    <div class="cname">دفتر طلب و بدهی</div>
+    <div class="dsum">
+      <div><div class="lbl">طلب من</div><div class="v" style="color:var(--acc)" id="dOwed"></div></div>
+      <div><div class="lbl">بدهی من</div><div class="v" style="color:var(--red)" id="dOwe"></div></div>
+      <div><div class="lbl">خالص</div><div class="v dnet" id="dNet"></div></div>
+    </div>
+    <input id="dName" placeholder="اسم شخص">
+    <input id="dAmt" inputmode="numeric" placeholder="مبلغ">
+    <input id="dNote" placeholder="بابت چی؟ (اختیاری)">
+    <div class="two"><button class="main" id="dOwedBtn">او به من بدهکاره</button><button class="main alt" id="dOweBtn">من بهش بدهکارم</button></div>
+    <div class="dh">به من بدهکارن</div><div id="dListOwed"></div>
+    <div class="dh">من بدهکارم به</div><div id="dListOwe"></div>
+  </div>
 </div>
 <script>
 var KEY="card-balance-v2",OLD="card-balance-v1",S={cards:[],cur:null},adding=false,editing=false;
@@ -94,6 +153,7 @@ try{var r=localStorage.getItem(KEY);
     if(o){var q=JSON.parse(o);
       if(q&&q.balance!==null&&q.balance!==undefined){var id=Date.now();S={cards:[{id:id,name:"کارت ۱",balance:q.balance,items:q.items||[]}],cur:id};}}}
 }catch(e){}
+if(!Array.isArray(S.debts))S.debts=[];
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function parse(v){
   v=String(v).replace(/[۰-۹]/g,function(d){return d.charCodeAt(0)-1776})
@@ -110,6 +170,7 @@ function armed(btn,label,fn){
   btn.dataset.a=setTimeout(function(){btn.dataset.a="";btn.textContent=btn.dataset.l;},3000);
 }
 function render(){
+  renderDebts();
   var c=cur();
   if(!c&&S.cards.length){S.cur=S.cards[0].id;c=S.cards[0];}
   var showAdd=adding||!S.cards.length;
@@ -133,6 +194,7 @@ function render(){
   $("cn").textContent=c.name;
   $("bal").className="bal"+(c.balance<0?" neg":"");
   $("bal").innerHTML=fmt(c.balance)+' <span class="unit">تومان</span>';
+  var ok=c.balance>0;$("stat").textContent=ok?"CALM SEAS":"STORM!";$("stat").className="stat";$("statrow").className="statrow "+(ok?"fine":"danger");
   $("editBox").style.display=editing?"block":"none";
   var l=$("list");l.innerHTML="";
   if(!c.items.length){l.innerHTML='<div class="empty">هنوز تراکنشی ثبت نشده.</div>';return;}
@@ -178,6 +240,41 @@ function deposit(){
 }
 $("depBtn").onclick=deposit;
 $("depIn").addEventListener("keydown",function(e){if(e.key==="Enter")deposit()});
+function fillDebts(id,kind,msg){
+  var l=$(id);l.innerHTML="";
+  var arr=S.debts.filter(function(d){return d.kind===kind});
+  if(!arr.length){l.innerHTML='<div class="empty">'+msg+'</div>';return;}
+  arr.forEach(function(d){
+    var row=document.createElement("div");row.className="row";
+    var a=document.createElement("div");
+    var t=document.createElement("div");t.textContent=d.who;t.style.fontWeight="700";
+    var s2=document.createElement("div");s2.className="sub";
+    s2.textContent=(d.note?d.note+" · ":"")+new Date(d.t).toLocaleDateString("fa-IR",{month:"short",day:"numeric"});
+    a.appendChild(t);a.appendChild(s2);
+    var m=document.createElement("div");m.className="amt"+(kind==="owed"?" in":"");m.textContent=fmt(d.amt);
+    var x=document.createElement("button");x.className="ghost";x.textContent="تسویه شد";
+    x.onclick=function(){armed(x,"مطمئنی؟",function(){S.debts=S.debts.filter(function(q){return q.id!==d.id});save();render();});};
+    var r=document.createElement("div");r.style.cssText="display:flex;align-items:center;gap:4px";
+    r.appendChild(m);r.appendChild(x);row.appendChild(a);row.appendChild(r);l.appendChild(row);
+  });
+}
+function renderDebts(){
+  var a=0,b=0;S.debts.forEach(function(d){if(d.kind==="owed")a+=d.amt;else b+=d.amt;});
+  var net=a-b,u=' <span class="unit">تومان</span>';
+  $("dOwed").innerHTML=fmt(a)+u;$("dOwe").innerHTML=fmt(b)+u;
+  $("dNet").innerHTML=(net<0?"−":"")+fmt(Math.abs(net))+u;
+  $("dNet").className="v dnet"+(net<0?" neg":"");
+  fillDebts("dListOwed","owed","هیچ‌کس بهت بدهکار نیست.");
+  fillDebts("dListOwe","owe","به کسی بدهکار نیستی.");
+}
+function addDebt(kind){
+  var who=$("dName").value.trim(),n=parse($("dAmt").value);
+  if(!who||isNaN(n)||n<=0)return;
+  S.debts.unshift({id:Date.now(),who:who,amt:n,kind:kind,note:$("dNote").value.trim(),t:Date.now()});
+  $("dName").value="";$("dAmt").value="";$("dNote").value="";save();render();
+}
+$("dOwedBtn").onclick=function(){addDebt("owed")};
+$("dOweBtn").onclick=function(){addDebt("owe")};
 render();
 try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}
 </script>
